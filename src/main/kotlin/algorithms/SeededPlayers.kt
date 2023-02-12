@@ -3,6 +3,8 @@ package algorithms
 import model.Player
 import kotlin.math.ceil
 
+
+// TODO: DOESNT WORK!
 fun seededPlayers(unseededPlayers: List<Player>, groupSize: Int): List<Player> {
     require(unseededPlayers.size >= groupSize) {
         "Insufficient number of players! At least $groupSize players are needed!"

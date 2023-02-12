@@ -14,13 +14,11 @@ fun createGroups(players: List<Player>, groupSize: Int): List<Group> {
 
 fun main() {
     val groupSize = 4
-    val players = (1..16).map {
-        Player("Player$it", it)
-    }
+    val players = (1..32)
+        .map { Player("Player$it", it) }
+        .shuffled()
 
-    val seededPlayers = seededPlayers(players, groupSize)
-
-    val groups = createGroups(seededPlayers, groupSize)
+    val groups = createGroups(players, groupSize)
     groups.forEach {
         println("Grupo ${it.id}")
         it.groupRounds.forEach(Round::printMatches)

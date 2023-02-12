@@ -16,7 +16,7 @@ private fun rotatePlayers(p: MutableList<Player>): MutableList<Player> {
 }
 
 fun roundRobin(p: List<Player>): List<Round> {
-    var players = p.sortedBy { it.seed }.toMutableList()
+    var players = p.toMutableList()
     if (players.size % 2 == 1) players.add(Player("bye", -1))
     val numOfMatches = players.size / 2
     val rounds = mutableListOf<Round>()
