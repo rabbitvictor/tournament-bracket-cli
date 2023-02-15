@@ -4,33 +4,52 @@ import model.Player
 import kotlin.math.ceil
 
 
-// TODO: DOESNT WORK!
-fun seededPlayers(unseededPlayers: List<Player>, groupSize: Int): List<Player> {
-    require(unseededPlayers.size >= groupSize) {
-        "Insufficient number of players! At least $groupSize players are needed!"
+fun seededPlayers(unseededPlayers: List<Player>, groupSize: Int, numOfGroups: Int): List<Player> {
+    require(unseededPlayers.size <= groupSize * numOfGroups) {
+        "Insufficient number of players! At least ${groupSize * numOfGroups} players are needed!"
     }
 
-    val numOfGroups = roundIntUp(unseededPlayers.size, groupSize)
-    val seeds = unseededPlayers.sortedBy { it.seed }.take(numOfGroups).toMutableList()
-    val seededPlayers = unseededPlayers
-        .shuffled()
-        .toMutableList()
-        .apply { seeds.forEach(::remove) }
-        .chunked(groupSize - 1)
-        .flatMap {
-            val seed = listOf(seeds.removeFirst())
-            seed + it
-        }
+    require(unseededPlayers.size >= numOfGroups * 2) {
+        "Insufficient number of players! At least ${numOfGroups * 2} players are needed!"
+    }
+
+    val seeds = getSeeds(unseededPlayers, numOfGroups).sortedBy { it.seed }.toMutableList()
+    val remainingPlayers = getRemainingPlayers(unseededPlayers, seeds).shuffled()
+    val seededPlayers = mutableListOf<Player>()
+
+    repeat(numOfGroups) {
+        seededPlayers += seeds.removeFirst()
+        seededPlayers += selectCurrentGroupPlayers(remainingPlayers, seededPlayers, groupSize)
+    }
 
     return seededPlayers
 }
 
-private fun roundIntUp(x: Int, y: Int) = ceil((x / y).toDouble()).toInt()
+private fun selectCurrentGroupPlayers(
+    remainingPlayers: List<Player>,
+    seededPlayers: MutableList<Player>,
+    groupSize: Int
+): List<Player> {
+    val availablePlayers = remainingPlayers
+        .filterNot {
+            it in seededPlayers
+        }
 
-fun main() {
-    val players = (1..11).map {
-        Player("Player$it", it)
+    return if (availablePlayers.size >= groupSize - 1) {
+        remainingPlayers.take(groupSize - 1)
+    } else {
+        remainingPlayers
     }
-    val seededPlayers = seededPlayers(players, 4)
-    println("breakpoint")
 }
+
+internal fun getSeeds(
+    unseededPlayers: List<Player>,
+    numOfGroups: Int
+) = unseededPlayers.sortedBy { it.seed }.take(numOfGroups)
+
+internal fun getRemainingPlayers(
+    unseededPlayers: List<Player>,
+    seeds: List<Player>
+) = unseededPlayers.filter { it !in seeds }
+
+private fun roundIntUp(x: Int, y: Int) = ceil((x / y).toDouble()).toInt()
